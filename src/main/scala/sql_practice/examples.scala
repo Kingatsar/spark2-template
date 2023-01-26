@@ -133,9 +133,97 @@ object examples {
       .drop(s08DF("_c2"))
       .drop(s08DF("_c3"))
       .show
-
-
   }
 
+  def exec4(): Unit = {
+    val spark = SessionBuilder.buildSession()
+    import spark.implicits._
 
-}
+    val toursDF = spark.read
+      .option("multiline", true)
+      .option("mode", "PERMISSIVE")
+      .json("data/input/tours.json")
+    toursDF.printSchema()
+
+    // Number of unique level of difficulties
+    toursDF
+      .groupBy($"tourDifficulty")
+      .count()
+      .orderBy($"count".desc)
+      .show()
+
+    // Min of tour prices
+    toursDF
+      .agg(min($"tourPrice").as("Min tour price"))
+      .show()
+
+    // Max of tour prices
+    toursDF
+      .agg(max($"tourPrice").as("Max tour price"))
+      .show()
+
+    // Avg of tour prices
+    toursDF
+      .agg(avg($"tourPrice").as("Avg tour price"))
+      .show()
+
+    // Min of tour prices for each level of difficulty
+    toursDF
+      .select("tourPrice", "tourDifficulty")
+      .groupBy($"tourDifficulty")
+      .agg(min($"tourPrice").as("Min tour price"))
+      .show()
+
+    // Max of tour prices for each level of difficulty
+    toursDF
+      .select("tourPrice", "tourDifficulty")
+      .groupBy($"tourDifficulty")
+      .agg(max($"tourPrice").as("Max tour price"))
+      .show()
+
+    // Avg of tour prices for each level of difficulty
+    toursDF
+      .select("tourPrice", "tourDifficulty")
+      .groupBy($"tourDifficulty")
+      .agg(avg($"tourPrice").as("Avg tour price"))
+      .show()
+
+    // min/max/avg of price and duration for each level of difficulty
+    toursDF
+      .select( "tourDifficulty", "tourPrice", "tourLength")
+      .groupBy($"tourDifficulty")
+      .agg(min($"tourPrice").as("Min tour price"),
+            max($"tourPrice").as("Max tour price"),
+            avg($"tourPrice").as("Avg tour price"),
+            min($"tourLength").as("Min tour length"),
+            max($"tourLength").as("Max tour length"),
+            avg($"tourLength").as("Avg tour length"))
+      .show()
+
+    // Top 10 tour tags
+    toursDF
+      .select(explode($"tourTags"))
+      .groupBy("col")
+      .count()
+      .orderBy($"count".desc)
+      .show(10)
+
+    // Relationship between top 10 tour tags and tour difficulty
+    toursDF
+      .select(explode($"tourTags"), $"tourDifficulty")
+      .groupBy($"col", $"tourDifficulty")
+      .count()
+      .orderBy($"count".desc)
+      .show(10)
+
+    toursDF
+      .select(explode($"tourTags"), $"tourDifficulty", $"tourPrice")
+      .groupBy($"col", $"tourDifficulty")
+      .agg(min($"tourPrice").as("Min"),
+        max($"tourPrice").as("Max"),
+        avg($"tourPrice").as("Avg"))
+      .orderBy($"Avg".desc)
+      .show(10)
+  }
+
+  }
