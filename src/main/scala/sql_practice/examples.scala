@@ -152,41 +152,22 @@ object examples {
       .orderBy($"count".desc)
       .show()
 
-    // Min of tour prices
+    // Min/max/avg of tour prices
     toursDF
-      .agg(min($"tourPrice").as("Min tour price"))
+      .agg(min($"tourPrice").as("Min tour price"),
+        max($"tourPrice").as("Max tour price"),
+        avg($"tourPrice").as("Avg tour price"))
       .show()
 
-    // Max of tour prices
-    toursDF
-      .agg(max($"tourPrice").as("Max tour price"))
-      .show()
-
-    // Avg of tour prices
-    toursDF
-      .agg(avg($"tourPrice").as("Avg tour price"))
-      .show()
-
-    // Min of tour prices for each level of difficulty
+    // Min/max/avg of tour prices for each level of difficulty
     toursDF
       .select("tourPrice", "tourDifficulty")
       .groupBy($"tourDifficulty")
-      .agg(min($"tourPrice").as("Min tour price"))
+      .agg(min($"tourPrice").as("Min tour price"),
+          max($"tourPrice").as("Max tour price"),
+          avg($"tourPrice").as("Avg tour price"))
       .show()
 
-    // Max of tour prices for each level of difficulty
-    toursDF
-      .select("tourPrice", "tourDifficulty")
-      .groupBy($"tourDifficulty")
-      .agg(max($"tourPrice").as("Max tour price"))
-      .show()
-
-    // Avg of tour prices for each level of difficulty
-    toursDF
-      .select("tourPrice", "tourDifficulty")
-      .groupBy($"tourDifficulty")
-      .agg(avg($"tourPrice").as("Avg tour price"))
-      .show()
 
     // min/max/avg of price and duration for each level of difficulty
     toursDF
