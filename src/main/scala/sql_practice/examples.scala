@@ -216,6 +216,7 @@ object examples {
       .orderBy($"count".desc)
       .show(10)
 
+    // min/max/avg of price in tour tags and tour difficulty relationship
     toursDF
       .select(explode($"tourTags"), $"tourDifficulty", $"tourPrice")
       .groupBy($"col", $"tourDifficulty")
