@@ -46,19 +46,25 @@ object examples {
     demoDF.show
 
     // Number inhabitants France
+    println("---------------------------------------------------------------------------")
+    println("Number inhabitants France")
     println(demoDF
       .agg(sum("Population").as("Population totale"))
       .show
     )
 
     // Top highly populated departments in France
+    println("---------------------------------------------------------------------------")
+    println("Top highly populated departments in France")
     demoDF
       .groupBy("Departement")
       .agg(sum("Population").alias("Population"))
       .orderBy($"Population".desc)
       .show
 
-    // join
+    // Join
+    println("---------------------------------------------------------------------------")
+    println("Join")
     val depDF = spark.read
       .csv("data/input/departements.txt")
 
@@ -80,11 +86,9 @@ object examples {
       .option("delimiter", "\t")
       .csv("data/input/sample_07")
 
-//
-//    s07DF.printSchema()
-//    s07DF.show()
-
     // Top salaries in 2007 above $100k
+    println("---------------------------------------------------------------------------")
+    println("Top salaries in 2007 above $100k")
     println(s07DF
       .withColumn("Total_emp", col("_c2").cast(IntegerType))
       .withColumn("Salary", col("_c3").cast(IntegerType))
@@ -97,6 +101,8 @@ object examples {
     )
 
     // Salary Growth from 2007-2008
+    println("---------------------------------------------------------------------------")
+    println("Salary Growth from 2007-2008")
     val s08DF = spark.read
       .option("delimiter", "\t")
       .csv("data/input/sample_08")
@@ -117,6 +123,8 @@ object examples {
       .show
 
     // Job loss among top earnings from 2007-2008
+    println("---------------------------------------------------------------------------")
+    println("Job loss among top earnings from 2007-2008")
     s08DF
       .withColumn("Code", s08DF("_c0"))
       .withColumn("Description", s08DF("_c1"))
@@ -146,6 +154,7 @@ object examples {
     toursDF.printSchema()
 
     // Number of unique level of difficulties
+    println("---------------------------------------------------------------------------")
     println("Number of unique level of difficulties")
     toursDF
       .groupBy($"tourDifficulty")
@@ -154,6 +163,7 @@ object examples {
       .show()
 
     // Min/max/avg of tour prices
+    println("---------------------------------------------------------------------------")
     println("Min/max/avg of tour prices")
     toursDF
       .agg(min($"tourPrice").as("Min tour price"),
@@ -162,6 +172,7 @@ object examples {
       .show()
 
     // Min/max/avg of tour prices for each level of difficulty
+    println("---------------------------------------------------------------------------")
     println("Min/max/avg of tour prices for each level of difficulty")
     toursDF
       .select("tourPrice", "tourDifficulty")
@@ -173,6 +184,7 @@ object examples {
 
 
     // min/max/avg of price and duration for each level of difficulty
+    println("---------------------------------------------------------------------------")
     println("min/max/avg of price and duration for each level of difficulty")
     toursDF
       .select( "tourDifficulty", "tourPrice", "tourLength")
@@ -186,6 +198,7 @@ object examples {
       .show()
 
     // Top 10 tour tags
+    println("---------------------------------------------------------------------------")
     println("Top 10 tour tags")
     toursDF
       .select(explode($"tourTags"))
@@ -195,6 +208,7 @@ object examples {
       .show(10)
 
     // Relationship between top 10 tour tags and tour difficulty
+    println("---------------------------------------------------------------------------")
     println("Relationship between top 10 tour tags and tour difficulty")
     toursDF
       .select(explode($"tourTags"), $"tourDifficulty")
@@ -204,6 +218,7 @@ object examples {
       .show(10)
 
     // min/max/avg of price in tour tags and tour difficulty relationship
+    println("---------------------------------------------------------------------------")
     println("min/max/avg of price in tour tags and tour difficulty relationship")
     toursDF
       .select(explode($"tourTags"), $"tourDifficulty", $"tourPrice")
