@@ -1,6 +1,7 @@
 package sql_practice
 
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.IntegerType
 import spark_helpers.SessionBuilder
 
 object examples {
@@ -44,7 +45,6 @@ object examples {
       .json("data/input/demographie_par_commune.json")
     demoDF.show
 
-
     // Number inhabitants France
     println(demoDF
       .agg(sum("Population").as("Population totale"))
@@ -70,6 +70,71 @@ object examples {
       .orderBy($"Population".desc)
       .join(depDF, demoDF("Departement")===depDF("_c1"), "inner")
       .show
+  }
+
+  def exec3(): Unit = {
+    val spark = SessionBuilder.buildSession()
+    import spark.implicits._
+
+    val s07DF = spark.read
+      .option("delimiter", "\t")
+      .csv("data/input/sample_07")
+
+//
+//    s07DF.printSchema()
+//    s07DF.show()
+
+    // Top salaries in 2007 above $100k
+    println(s07DF
+      .withColumn("Total_emp", col("_c2").cast(IntegerType))
+      .withColumn("Salary", col("_c3").cast(IntegerType))
+      .drop("_c2")
+      .drop("_c3")
+      .withColumn("Description", col("_c1"))
+      .select("Description","Salary").where(col("Salary")>100000)
+      .orderBy($"Salary".desc)
+      .show
+    )
+
+    // Salary Growth from 2007-2008
+    val s08DF = spark.read
+      .option("delimiter", "\t")
+      .csv("data/input/sample_08")
+
+    s08DF
+      .withColumn("Code", s08DF("_c0"))
+      .withColumn("Description", s08DF("_c1"))
+      .join(s07DF, s08DF("_c0")===s07DF("_c0"))
+      .withColumn("Growth", s08DF("_c3")-s07DF("_c3"))
+      .drop(s07DF("_c0"))
+      .drop(s07DF("_c1"))
+      .drop(s07DF("_c2"))
+      .drop(s07DF("_c3"))
+      .drop(s08DF("_c0"))
+      .drop(s08DF("_c1"))
+      .drop(s08DF("_c2"))
+      .drop(s08DF("_c3"))
+      .show
+
+    // Job loss among top earnings from 2007-2008
+    s08DF
+      .withColumn("Code", s08DF("_c0"))
+      .withColumn("Description", s08DF("_c1"))
+      .join(s07DF, s08DF("_c0")===s07DF("_c0"))
+      .withColumn("Growth", s08DF("_c3") - s07DF("_c3"))
+      .withColumn("Job loss", s08DF("_c2") - s07DF("_c2"))
+      .where(col("Growth")>0 and col("Job loss")<0)
+      .drop(s07DF("_c0"))
+      .drop(s07DF("_c1"))
+      .drop(s07DF("_c2"))
+      .drop(s07DF("_c3"))
+      .drop(s08DF("_c0"))
+      .drop(s08DF("_c1"))
+      .drop(s08DF("_c2"))
+      .drop(s08DF("_c3"))
+      .show
+
+
   }
 
 
